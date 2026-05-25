@@ -3,6 +3,8 @@ import { Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom'
 import WinLek from './pages/WinLek.jsx'
 import Dream from './pages/Dream.jsx'
 import Plans from './pages/Plans.jsx'
+import Articles from './pages/Articles.jsx'
+import ArticleDetail from './pages/ArticleDetail.jsx'
 import './App.css'
 
 const API_BASE = import.meta.env.DEV ? 'http://129.212.231.19' : ''
@@ -149,6 +151,9 @@ function App() {
           <NavLink to="/dream" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
             <span className="drawer-ic">🌙</span> ทำนายฝัน {!hasPremium && <span className="lock">🔒</span>}
           </NavLink>
+          <NavLink to="/articles" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+            <span className="drawer-ic">📚</span> บทความ
+          </NavLink>
           {!isAdmin && (
             <NavLink to="/plans" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
               <span className="drawer-ic">💎</span> แพลน
@@ -169,6 +174,8 @@ function App() {
           <Route path="/" element={hasAnyActive ? <WinLek /> : <Navigate to="/plans" replace />} />
           <Route path="/dream" element={hasAnyActive ? <Dream apiBase={API_BASE} hasAccess={hasPremium} /> : <Navigate to="/plans" replace />} />
           <Route path="/plans" element={<Plans plans={plans} apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
+          <Route path="/articles" element={<Articles apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
+          <Route path="/articles/:slug" element={<ArticleDetail apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
         </Routes>
       </main>
     </div>
