@@ -62,14 +62,17 @@ function App() {
     const perm3 = multisetPermutations(digits, 3).map((p) => ({ str: p.join(''), arr: p }))
     const sortStr = (a, b) => a.localeCompare(b)
 
+    const twoPermStrs = perm2.map((x) => x.str)
     const threePermStrs = perm3.map((x) => x.str)
     const uniqueDigits = [...new Set(digits)]
+    const doubles = uniqueDigits.map((d) => d.repeat(2))
     const triples = uniqueDigits.map((d) => d.repeat(3))
+    const withDoubleSet = new Set([...twoPermStrs, ...doubles])
     const withTripleSet = new Set([...threePermStrs, ...triples])
 
     return {
       twoNoDouble: perm2.filter(({ arr }) => !allSame(arr)).map((x) => x.str).sort(sortStr),
-      twoWithDouble: perm2.map((x) => x.str).sort(sortStr),
+      twoWithDouble: [...withDoubleSet].sort(sortStr),
       threeNoTriple: perm3.filter(({ arr }) => !allSame(arr)).map((x) => x.str).sort(sortStr),
       threeWithTriple: [...withTripleSet].sort(sortStr),
     }
