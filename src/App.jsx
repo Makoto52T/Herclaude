@@ -264,7 +264,10 @@ function App() {
         <div className="user">
           {user.picture && <img src={user.picture} alt="" referrerPolicy="no-referrer" />}
           <div className="meta">
-            <span className="name">{user.name}</span>
+            <span className="name">
+              {user.name}
+              {user.admin && <span className="admin-badge">ADMIN</span>}
+            </span>
             <span className="email">
               {user.email}
               {subscription && subscription.current_period_end && (
@@ -272,7 +275,7 @@ function App() {
               )}
             </span>
           </div>
-          <button className="btn-portal" onClick={handlePortal}>จัดการสมาชิก</button>
+          {!user.admin && <button className="btn-portal" onClick={handlePortal}>จัดการสมาชิก</button>}
           <a className="btn-logout" href={`${API_BASE}/logout`}>ออกจากระบบ</a>
         </div>
       </header>
