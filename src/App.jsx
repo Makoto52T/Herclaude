@@ -34,6 +34,7 @@ function App() {
 
   const [input, setInput] = useState('')
   const [includeDoubles, setIncludeDoubles] = useState(false)
+  const [includeTriples, setIncludeTriples] = useState(false)
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -59,7 +60,7 @@ function App() {
     const perms = permutations(digits, 2).map((p) => p.join(''))
     if (includeDoubles) {
       const doubles = digits.map((d) => d + d)
-      return [...perms, ...doubles].sort()
+      return [...new Set([...perms, ...doubles])].sort()
     }
     return perms.sort()
   }, [digits, includeDoubles])
@@ -67,22 +68,24 @@ function App() {
   const three = useMemo(() => {
     if (digits.length < 1) return []
     const perms = permutations(digits, 3).map((p) => p.join(''))
+    const all = new Set(perms)
     if (includeDoubles) {
-      const extras = []
       for (const a of digits) {
         for (const b of digits) {
           if (a === b) continue
-          extras.push(a + a + b)
-          extras.push(a + b + b)
-          extras.push(b + a + a)
+          all.add(a + a + b)
+          all.add(a + b + a)
+          all.add(b + a + a)
         }
-        extras.push(a + a + a)
       }
-      const all = new Set([...perms, ...extras])
-      return [...all].sort()
     }
-    return perms.sort()
-  }, [digits, includeDoubles])
+    if (includeTriples) {
+      for (const a of digits) {
+        all.add(a + a + a)
+      }
+    }
+    return [...all].sort()
+  }, [digits, includeDoubles, includeTriples])
 
   const copyAll = (list) => {
     navigator.clipboard.writeText(list.join(' '))
@@ -138,7 +141,7 @@ function App() {
       <main className="content">
         <section className="card">
           <h2>🔢 ใส่ชุดเลข</h2>
-          <p className="desc">พิมพ์ตัวเลขที่ต้องการวิน (ตัวซ้ำจะถูกตัดออกอัตโนมัติ)</p>
+          <p className="desc">พิมพ์ตัวเลขที่ต้องการวิน (หลักที่พิมพ์ซ้ำในชุด input จะถูกตัดออก)</p>
           <input
             ref={inputRef}
             className="num-input"
@@ -157,7 +160,15 @@ function App() {
                 checked={includeDoubles}
                 onChange={(e) => setIncludeDoubles(e.target.checked)}
               />
-              <span>รวมเลขเบิ้ล/ตอง (เช่น 11, 22, 111)</span>
+              <span>รวมเลขเบิ้ล (เช่น 11, 22, 112, 121)</span>
+            </label>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={includeTriples}
+                onChange={(e) => setIncludeTriples(e.target.checked)}
+              />
+              <span>รวมเลขตอง (เช่น 111, 222, 333)</span>
             </label>
             <span className="digit-info">
               {digits.length > 0
