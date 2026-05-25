@@ -45,8 +45,8 @@ function App() {
     Promise.all([
       refreshMe(),
       fetch(`${API_BASE}/api/plans`)
-        .then((r) => (r.ok ? r.json() : { plans: [] }))
-        .then((d) => setPlans(d.plans || []))
+        .then((r) => (r.ok ? r.json() : []))
+        .then((d) => setPlans(Array.isArray(d) ? d : (d.plans || [])))
         .catch(() => setPlans([])),
     ]).finally(() => setLoading(false))
   }, [])
