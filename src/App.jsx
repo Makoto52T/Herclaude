@@ -13,6 +13,15 @@ function App() {
   const [subscription, setSubscription] = useState(null)
   const [plans, setPlans] = useState([])
   const [banner, setBanner] = useState(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => { setDrawerOpen(false) }, [location.pathname])
+
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [drawerOpen])
 
   const refreshMe = () => {
     return fetch(`${API_BASE}/api/me`, { credentials: 'include' })
@@ -95,16 +104,16 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
+        <button
+          type="button"
+          className={'hamburger' + (drawerOpen ? ' open' : '')}
+          onClick={() => setDrawerOpen((v) => !v)}
+          aria-label="เปิดเมนู"
+          aria-expanded={drawerOpen}
+        >
+          <span /><span /><span />
+        </button>
         <div className="brand"><span className="logo">🎲</span> Herclaude</div>
-        <nav className="main-nav">
-          <NavLink to="/" end className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>วินเลข</NavLink>
-          <NavLink to="/dream" className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>
-            ทำนายฝัน {!hasPremium && <span className="lock">🔒</span>}
-          </NavLink>
-          {!isAdmin && (
-            <NavLink to="/plans" className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>แพลน</NavLink>
-          )}
-        </nav>
         <div className="user">
           {user.photo && <img src={user.photo} alt="" />}
           <div className="meta">
@@ -118,6 +127,35 @@ function App() {
           <a href={`${API_BASE}/logout`} className="btn-logout" title="ออกจากระบบ">↩</a>
         </div>
       </header>
+
+      <div
+        className={'drawer-backdrop' + (drawerOpen ? ' show' : '')}
+        onClick={() => setDrawerOpen(false)}
+      />
+      <aside className={'drawer' + (drawerOpen ? ' open' : '')}>
+        <div className="drawer-head">
+          <span className="drawer-title">เมนู</span>
+          <button
+            type="button"
+            className="drawer-close"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="ปิดเมนู"
+          >×</button>
+        </div>
+        <nav className="drawer-nav">
+          <NavLink to="/" end className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+            <span className="drawer-ic">🎲</span> วินเลข
+          </NavLink>
+          <NavLink to="/dream" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+            <span className="drawer-ic">🌙</span> ทำนายฝัน {!hasPremium && <span className="lock">🔒</span>}
+          </NavLink>
+          {!isAdmin && (
+            <NavLink to="/plans" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+              <span className="drawer-ic">💎</span> แพลน
+            </NavLink>
+          )}
+        </nav>
+      </aside>
 
       {banner && (
         <div className={`banner banner-${banner.type}`}>
