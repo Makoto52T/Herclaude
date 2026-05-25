@@ -76,18 +76,18 @@ export default function Dream({ apiBase, hasAccess }) {
 
       <section className="dream-result">
         {error && <div className="banner banner-error">{error}</div>}
-        {result && result.matches && result.matches.length === 0 && (
+        {result && result.results && result.results.length === 0 && (
           <div className="dream-empty">
             ไม่พบ "{result.query}" ในตำราฝัน ลองคำอื่นดูครับ
           </div>
         )}
-        {result && result.matches && result.matches.length > 0 && (
+        {result && result.results && result.results.length > 0 && (
           <div className="dream-cards">
-            {result.matches.map((m, idx) => (
+            {result.results.map((m, idx) => (
               <div className="output-card" key={idx}>
                 <div className="output-head">
                   <h3>
-                    <span className="ic">🌙</span> {m.keyword}
+                    <span className="ic">🌙</span> {m.matched}
                   </h3>
                   <div className="head-right">
                     <span className="count">{m.numbers.length}</span>
