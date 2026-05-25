@@ -691,6 +691,31 @@ html, body, #root { height: 100%; }
 }
 .paywall p { margin: 0 0 14px; color: var(--text-h); font-weight: 600; }
 
+.topbar-guest { justify-content: space-between; }
+.btn-login-top {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity 0.15s;
+}
+.btn-login-top:hover { opacity: 0.9; }
+
+.btn-secondary-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.btn-secondary-link:hover { background: var(--accent-bg); }
+
 @media (max-width: 640px) {
   .article-detail { padding: 20px 18px 28px; }
   .article-detail h1 { font-size: 22px; }

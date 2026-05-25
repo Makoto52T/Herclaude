@@ -77,6 +77,23 @@ function App() {
   }
 
   if (!user) {
+    if (location.pathname.startsWith('/articles')) {
+      return (
+        <div className="app">
+          <header className="topbar topbar-guest">
+            <div className="brand"><span className="logo">🎲</span> Herclaude</div>
+            <a href={`${API_BASE}/auth/google`} className="btn-login-top">เข้าสู่ระบบ</a>
+          </header>
+          <main className="content">
+            <Routes>
+              <Route path="/articles" element={<Articles apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
+              <Route path="/articles/:slug" element={<ArticleDetail apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
+              <Route path="*" element={<Navigate to="/articles" replace />} />
+            </Routes>
+          </main>
+        </div>
+      )
+    }
     return (
       <div className="center-screen">
         <div className="login-card">
@@ -86,6 +103,7 @@ function App() {
           <a href={`${API_BASE}/auth/google`} className="btn-google">
             <span>🔐</span> เข้าสู่ระบบด้วย Google
           </a>
+          <a href="/articles" className="btn-secondary-link">📚 อ่านบทความ (ไม่ต้องสมัคร)</a>
         </div>
       </div>
     )

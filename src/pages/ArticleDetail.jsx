@@ -69,6 +69,8 @@ export default function ArticleDetail({ apiBase, onError }) {
           const data = await r.json().catch(() => ({}))
           if (r.status === 402) {
             setError({ type: 'paywall', article: data.article })
+          } else if (r.status === 401) {
+            setError({ type: 'login', article: data.article })
           } else if (r.status === 404) {
             setError({ type: 'notfound' })
           } else {
@@ -84,6 +86,24 @@ export default function ArticleDetail({ apiBase, onError }) {
   }, [slug, apiBase, onError])
 
   if (loading) return <div className="art-empty">กำลังโหลด...</div>
+
+  if (error?.type === 'login') {
+    return (
+      <section className="article-page">
+        <Link to="/articles" className="article-back">← กลับ</Link>
+        <article className="article-detail">
+          <h1>{error.article?.title || 'บทความ Premium'}</h1>
+          {error.article?.excerpt && <p className="article-excerpt-lead">{error.article.excerpt}</p>}
+          <div className="paywall">
+            <p>🔒 บทความนี้สำหรับสมาชิกเท่านั้น — เข้าสู่ระบบก่อน</p>
+            <a href={`${apiBase}/auth/google`} className="btn-subscribe" style={{ display: 'inline-block', textAlign: 'center', textDecoration: 'none' }}>
+              เข้าสู่ระบบด้วย Google
+            </a>
+          </div>
+        </article>
+      </section>
+    )
+  }
 
   if (error?.type === 'paywall') {
     return (
