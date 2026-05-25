@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 
 const API_BASE = import.meta.env.DEV ? 'http://129.212.231.19' : ''
@@ -34,6 +34,7 @@ function App() {
 
   const [input, setInput] = useState('')
   const [includeDoubles, setIncludeDoubles] = useState(false)
+  const inputRef = useRef(null)
 
   useEffect(() => {
     fetch(`${API_BASE}/api/me`, { credentials: 'include' })
@@ -44,6 +45,12 @@ function App() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (!loading && user && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [loading, user])
 
   const digits = useMemo(() => uniqueDigits(input), [input])
 
@@ -133,6 +140,7 @@ function App() {
           <h2>🔢 ใส่ชุดเลข</h2>
           <p className="desc">พิมพ์ตัวเลขที่ต้องการวิน (ตัวซ้ำจะถูกตัดออกอัตโนมัติ)</p>
           <input
+            ref={inputRef}
             className="num-input"
             type="text"
             inputMode="numeric"
@@ -140,6 +148,7 @@ function App() {
             value={input}
             onChange={(e) => setInput(e.target.value.replace(/\D/g, ''))}
             maxLength={10}
+            autoFocus
           />
           <div className="opts">
             <label className="check">
