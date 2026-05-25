@@ -131,8 +131,8 @@ html, body, #root { height: 100%; }
   font-size: 14px;
   text-align: center;
 }
-.banner-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-.banner-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.banner-success { background: rgba(110, 231, 183, 0.12); color: #6ee7b7; border: 1px solid rgba(110, 231, 183, 0.4); }
+.banner-error   { background: rgba(252, 165, 165, 0.12); color: #fca5a5; border: 1px solid rgba(252, 165, 165, 0.4); }
 .banner-info    { background: var(--code-bg); color: var(--text-h); border: 1px solid var(--border); }
 
 .plans-content {
@@ -717,12 +717,12 @@ html, body, #root { height: 100%; }
 .btn-secondary-link:hover { background: var(--accent-bg); }
 
 .formula-disclaimer {
-  background: #fef3c7;
-  border: 1px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.45);
   border-radius: 10px;
   padding: 10px 14px;
   font-size: 13px;
-  color: #78350f;
+  color: #fcd34d;
   line-height: 1.6;
   max-width: 980px;
   width: 100%;
