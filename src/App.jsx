@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, NavLink, useLocation } from 'react-router-dom'
+import { Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom'
 import WinLek from './pages/WinLek.jsx'
 import Dream from './pages/Dream.jsx'
 import Plans from './pages/Plans.jsx'
@@ -144,7 +144,7 @@ function App() {
         </div>
         <nav className="drawer-nav">
           <NavLink to="/" end className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
-            <span className="drawer-ic">🎲</span> วินเลข
+            <span className="drawer-ic">🎲</span> วินเลข {!hasAnyActive && <span className="lock">🔒</span>}
           </NavLink>
           <NavLink to="/dream" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
             <span className="drawer-ic">🌙</span> ทำนายฝัน {!hasPremium && <span className="lock">🔒</span>}
@@ -166,8 +166,8 @@ function App() {
 
       <main className="content">
         <Routes>
-          <Route path="/" element={<WinLek />} />
-          <Route path="/dream" element={<Dream apiBase={API_BASE} hasAccess={hasPremium} />} />
+          <Route path="/" element={hasAnyActive ? <WinLek /> : <Navigate to="/plans" replace />} />
+          <Route path="/dream" element={hasAnyActive ? <Dream apiBase={API_BASE} hasAccess={hasPremium} /> : <Navigate to="/plans" replace />} />
           <Route path="/plans" element={<Plans plans={plans} apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
         </Routes>
       </main>
