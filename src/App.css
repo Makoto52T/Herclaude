@@ -150,6 +150,7 @@ html, body, #root { height: 100%; }
   gap: 18px;
   max-width: 980px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .plan-card {
@@ -374,12 +375,18 @@ html, body, #root { height: 100%; }
 
 @media (max-width: 1024px) {
   .outputs-grid { grid-template-columns: repeat(2, 1fr); }
+  .plans-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 640px) {
   .app { height: auto; min-height: 100vh; overflow: visible; }
   .outputs-grid { grid-template-columns: 1fr; }
   .num-input { font-size: 22px; letter-spacing: 3px; }
   .topbar .user .meta { display: none; }
+  .plans-grid { grid-template-columns: 1fr; gap: 14px; }
+  .plan-card { padding: 20px 16px; }
+  .plan-price .amount { font-size: 36px; }
+  .plans-intro h2 { font-size: 20px; }
+  .content { padding: 12px 14px; }
 }
 
 .hamburger {
