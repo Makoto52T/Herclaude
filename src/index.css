@@ -1,7 +1,7 @@
 :root {
   --text: #6b6375;
   --text-h: #08060d;
-  --bg: #fff;
+  --bg: #fefcff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
@@ -48,10 +48,17 @@
   #social .button-icon {
     filter: invert(1) brightness(2);
   }
+
+  body {
+    background: linear-gradient(160deg, #0e0b18 0%, #11131d 50%, #0b1020 100%);
+  }
 }
 
 body {
   margin: 0;
+  background: linear-gradient(160deg, #f3eeff 0%, #f8f6ff 45%, #edf3ff 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 #root {
