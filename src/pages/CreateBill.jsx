@@ -42,10 +42,14 @@ export default function CreateBill({ apiBase, onError }) {
   const [saveDone, setSaveDone] = useState(false)
 
   const applyBulk = () => {
-    setRows(prev => prev.map(r => ({
-      ...r,
-      ...(bulkTop !== '' ? { priceTop: bulkTop } : {}),
-      ...(bulkBottom !== '' ? { priceBottom: bulkBottom } : {}),
+    if (bulkTop === '' && bulkBottom === '') return
+    setGroups(prev => prev.map(g => ({
+      ...g,
+      items: g.items.map(item => ({
+        ...item,
+        ...(bulkTop !== '' ? { priceTop: bulkTop } : {}),
+        ...(bulkBottom !== '' ? { priceBottom: bulkBottom } : {}),
+      })),
     })))
   }
 
