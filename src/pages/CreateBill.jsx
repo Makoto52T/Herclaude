@@ -1,20 +1,13 @@
 import { useState } from 'react'
 import HelpModal from '../HelpModal'
 
-const HELP_STEPS = [
-  'เลือกประเภทหวยและวันที่งวดด้านบน',
-  'กรอกเลขในช่อง "เลข" ได้ทั้ง 2 ตัวหรือ 3 ตัว — หรือวางเลขหลายตัวพร้อมกัน เช่น "12 22 36" แล้วระบบจะแตกแถวให้อัตโนมัติ',
-  'กรอกราคาบน / ล่าง-โต๊ด ต่อแถว — หรือกรอกแถว "ตั้งราคาทุกเลข" แล้วกด "ตั้งราคา" เพื่อตั้งพร้อมกันทุกแถว',
-  'กด "✓ บันทึกลง list" เพื่อเพิ่มชุดนี้ลงรายการ — สามารถสร้างได้หลายชุด',
-  'กด chip เลขใดเลขหนึ่งใน list เพื่อลบออก หรือ "ยกเลิกทั้งชุด" เพื่อยกเลิกทั้งกลุ่ม',
-  'กด "📋 Copy ทั้งหมด" เพื่อคัดลอก หรือ "💾 บันทึกลงประวัติการซื้อ" เพื่อบันทึกในระบบ',
-]
-
 const DRAW_TYPES = [
   { value: 'thai_gov', label: 'หวยรัฐบาล' },
   { value: 'hanoi', label: 'หวยฮานอย' },
   { value: 'lao', label: 'หวยลาว' },
 ]
+
+const QUICK_AMOUNTS = [10, 20, 50, 100]
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10)
@@ -25,159 +18,116 @@ function drawLabel(type) {
 }
 
 let _uid = 1
-function newRow() {
-  return { id: _uid++, number: '', priceTop: '', priceBottom: '' }
-}
 
-function groupByPrice(items) {
-  const map = new Map()
-  items.forEach(item => {
-    const key = `${item.priceTop}|${item.priceBottom}`
-    if (!map.has(key)) map.set(key, { priceTop: item.priceTop, priceBottom: item.priceBottom, items: [] })
-    map.get(key).items.push(item)
-  })
-  return Array.from(map.values())
+function parseNumbers(text) {
+  return text.split(/[\s,\n]+/)
+    .map(s => s.replace(/\D/g, ''))
+    .filter(n => n.length >= 2 && n.length <= 3)
 }
 
 export default function CreateBill({ apiBase, onError }) {
   const [showHelp, setShowHelp] = useState(false)
   const [drawType, setDrawType] = useState('thai_gov')
   const [drawDate, setDrawDate] = useState(todayStr())
-  const [rows, setRows] = useState([newRow()])
-  const [bulkTop, setBulkTop] = useState('')
-  const [bulkBottom, setBulkBottom] = useState('')
-  const [groups, setGroups] = useState([])
+
+  const [numberInput, setNumberInput] = useState('')
+  const [betTypes, setBetTypes] = useState({ top: true, bottom: false, toad: false })
+  const [priceTop, setPriceTop] = useState('')
+  const [priceBottom, setPriceBottom] = useState('')
+  const [priceToad, setPriceToad] = useState('')
+
+  const [cart, setCart] = useState([])
   const [saving, setSaving] = useState(false)
-  const [copyDone, setCopyDone] = useState(false)
   const [saveDone, setSaveDone] = useState(false)
+  const [copyDone, setCopyDone] = useState(false)
 
-  const applyBulk = () => {
-    if (bulkTop === '' && bulkBottom === '') return
-    setGroups(prev => prev.map(g => ({
-      ...g,
-      items: g.items.map(item => ({
-        ...item,
-        ...(bulkTop !== '' ? { priceTop: bulkTop } : {}),
-        ...(bulkBottom !== '' ? { priceBottom: bulkBottom } : {}),
-      })),
-    })))
+  const parsedNumbers = parseNumbers(numberInput)
+  const singleNumber = /^\d{2,3}$/.test(numberInput.trim()) ? [numberInput.trim()] : []
+  const activeNumbers = parsedNumbers.length > 1 ? parsedNumbers : singleNumber
+
+  const toggleBetType = (type) => setBetTypes(prev => ({ ...prev, [type]: !prev[type] }))
+
+  const canAdd = () => {
+    if (activeNumbers.length === 0) return false
+    if (!betTypes.top && !betTypes.bottom && !betTypes.toad) return false
+    if (betTypes.top && !priceTop) return false
+    if (betTypes.bottom && !priceBottom) return false
+    if (betTypes.toad && !priceToad) return false
+    return true
   }
 
-  const handleNumberChange = (rowId, value) => {
-    if (/[\s,\n]/.test(value.trim())) {
-      const nums = value.split(/[\s,\n]+/).map(s => s.replace(/\D/g, '')).filter(n => n.length >= 2 && n.length <= 3)
-      if (nums.length > 1) {
-        const currentRow = rows.find(r => r.id === rowId)
-        const insertRows = nums.map(n => ({
-          id: _uid++,
-          number: n,
-          priceTop: currentRow?.priceTop || '',
-          priceBottom: currentRow?.priceBottom || '',
-        }))
-        setRows(prev => {
-          const idx = prev.findIndex(r => r.id === rowId)
-          return [...prev.slice(0, idx), ...insertRows, ...prev.slice(idx + 1)]
-        })
-        return
+  const addToCart = () => {
+    if (!canAdd()) return
+    const newItems = []
+    activeNumbers.forEach(num => {
+      if (betTypes.top && Number(priceTop) > 0) {
+        newItems.push({ id: _uid++, number: num, betType: 'บน', price: Number(priceTop), drawType, drawDate })
       }
-    }
-    setRows(prev => prev.map(r => r.id === rowId ? { ...r, number: value.replace(/\D/g, '').slice(0, 3) } : r))
-  }
-
-  const updateRow = (rowId, field, value) => {
-    setRows(prev => prev.map(r => r.id === rowId ? { ...r, [field]: value } : r))
-  }
-
-  const removeRow = (rowId) => {
-    setRows(prev => {
-      const next = prev.filter(r => r.id !== rowId)
-      return next.length === 0 ? [newRow()] : next
+      if (betTypes.bottom && Number(priceBottom) > 0) {
+        newItems.push({ id: _uid++, number: num, betType: 'ล่าง', price: Number(priceBottom), drawType, drawDate })
+      }
+      if (betTypes.toad && Number(priceToad) > 0 && num.length === 3) {
+        newItems.push({ id: _uid++, number: num, betType: 'โต๊ด', price: Number(priceToad), drawType, drawDate })
+      }
     })
+    if (newItems.length === 0) return
+    setCart(prev => [...prev, ...newItems])
+    setNumberInput('')
   }
 
-  const addRow = () => setRows(prev => [...prev, newRow()])
+  const removeFromCart = (id) => setCart(prev => prev.filter(item => item.id !== id))
+  const clearCart = () => setCart([])
 
-  const saveToList = () => {
-    const validRows = rows.filter(r => /^\d{2,3}$/.test(r.number) && (Number(r.priceTop) > 0 || Number(r.priceBottom) > 0))
-    if (validRows.length === 0) return
-    setGroups(prev => [...prev, {
-      id: Date.now(),
-      drawType,
-      drawDate,
-      items: validRows.map(r => ({ ...r, priceTop: r.priceTop || 0, priceBottom: r.priceBottom || 0 })),
-    }])
-    setRows([newRow()])
-    setBulkTop('')
-    setBulkBottom('')
-  }
+  const totalAmount = cart.reduce((s, item) => s + item.price, 0)
 
-  const removeFromGroup = (groupId, rowId) => {
-    setGroups(prev => prev.map(g => {
-      if (g.id !== groupId) return g
-      const items = g.items.filter(i => i.id !== rowId)
-      return items.length === 0 ? null : { ...g, items }
-    }).filter(Boolean))
-  }
-
-  const cancelGroup = (groupId) => setGroups(prev => prev.filter(g => g.id !== groupId))
+  const cartByNumber = Object.values(
+    cart.reduce((acc, item) => {
+      const key = `${item.number}|${item.drawType}|${item.drawDate}`
+      if (!acc[key]) acc[key] = { number: item.number, drawType: item.drawType, drawDate: item.drawDate, bets: [] }
+      acc[key].bets.push(item)
+      return acc
+    }, {})
+  )
 
   const copyAll = async () => {
     const lines = []
-    groups.forEach(g => {
-      lines.push(`=== ${drawLabel(g.drawType)} ${g.drawDate} ===`)
-      g.items.forEach(item => {
-        const parts = [item.number]
-        if (Number(item.priceTop) > 0) parts.push(`บน ${item.priceTop}฿`)
-        if (Number(item.priceBottom) > 0) {
-          const lbl = item.number.length === 3 ? 'ล่าง/โต๊ด' : 'ล่าง'
-          parts.push(`${lbl} ${item.priceBottom}฿`)
-        }
-        lines.push(parts.join(' | '))
-      })
+    const groups = {}
+    cart.forEach(item => {
+      const key = `${item.drawType}|${item.drawDate}`
+      if (!groups[key]) groups[key] = []
+      groups[key].push(item)
+    })
+    Object.entries(groups).forEach(([key, items]) => {
+      const [dt, dd] = key.split('|')
+      lines.push(`=== ${drawLabel(dt)} ${dd} ===`)
+      items.forEach(item => lines.push(`${item.number} ${item.betType} ${item.price}฿`))
       lines.push('')
     })
+    lines.push(`รวม: ${totalAmount.toLocaleString()}฿`)
     await navigator.clipboard.writeText(lines.join('\n'))
     setCopyDone(true)
     setTimeout(() => setCopyDone(false), 2000)
   }
 
   const saveToPurchases = async () => {
-    if (groups.length === 0) return
+    if (cart.length === 0) return
     setSaving(true)
     try {
-      for (const g of groups) {
-        for (const item of g.items) {
-          if (Number(item.priceTop) > 0) {
-            await fetch(`${apiBase}/api/purchases`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                draw_type: g.drawType,
-                draw_date: g.drawDate,
-                number: item.number,
-                bet_type: 'บน',
-                amount: Number(item.priceTop),
-              }),
-            })
-          }
-          if (Number(item.priceBottom) > 0) {
-            await fetch(`${apiBase}/api/purchases`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                draw_type: g.drawType,
-                draw_date: g.drawDate,
-                number: item.number,
-                bet_type: item.number.length === 3 ? 'โต๊ด' : 'ล่าง',
-                amount: Number(item.priceBottom),
-              }),
-            })
-          }
-        }
+      for (const item of cart) {
+        await fetch(`${apiBase}/api/purchases`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            draw_type: item.drawType,
+            draw_date: item.drawDate,
+            number: item.number,
+            bet_type: item.betType,
+            amount: item.price,
+          }),
+        })
       }
-      setGroups([])
+      setCart([])
       setSaveDone(true)
       setTimeout(() => setSaveDone(false), 3000)
     } catch (e) {
@@ -187,155 +137,174 @@ export default function CreateBill({ apiBase, onError }) {
     }
   }
 
-  const totalItems = groups.reduce((s, g) => s + g.items.length, 0)
-  const hasValidRows = rows.some(r => /^\d{2,3}$/.test(r.number))
-
   return (
     <section className="bill-page">
-      {showHelp && <HelpModal title="วิธีใช้ สร้างบิล" steps={HELP_STEPS} onClose={() => setShowHelp(false)} />}
+      {showHelp && (
+        <HelpModal
+          title="วิธีใช้ สร้างบิล"
+          steps={[
+            'เลือกประเภทหวยและงวดวันที่',
+            'กรอกเลข 2 หรือ 3 ตัว — หรือวางหลายเลขพร้อมกัน เช่น "12 22 36"',
+            'เลือกประเภทการแทง: บน / ล่าง / โต๊ด (เลือกได้หลายประเภท)',
+            'กดปุ่มราคา หรือกรอกราคาเอง แล้วกด "เพิ่มลงตะกร้า"',
+            'ทำซ้ำได้หลายรอบ ตะกร้าแสดงยอดรวมทั้งหมด',
+            'กด "ยืนยันรายการ" เพื่อบันทึกลงประวัติการซื้อ',
+          ]}
+          onClose={() => setShowHelp(false)}
+        />
+      )}
 
       <div className="bill-header">
-        <h2>🧾 สร้างบิล <button className="help-btn" onClick={() => setShowHelp(true)} title="วิธีใช้">?</button></h2>
-        <p>จัดชุดเลข กำหนดราคา และบันทึกลงประวัติ</p>
+        <h2>🧾 สร้างบิล <button className="help-btn" onClick={() => setShowHelp(true)}>?</button></h2>
       </div>
 
-      <div className="bill-settings">
-        <div className="bill-setting-item">
-          <label>ประเภทหวย</label>
-          <select className="fav-select" value={drawType} onChange={e => setDrawType(e.target.value)}>
-            {DRAW_TYPES.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
-          </select>
+      {/* Step 1: Lottery type */}
+      <div className="shop-step">
+        <div className="shop-step-label">1 · ประเภทหวย</div>
+        <div className="bill-type-tabs">
+          {DRAW_TYPES.map(d => (
+            <button
+              key={d.value}
+              className={'bill-type-tab' + (drawType === d.value ? ' active' : '')}
+              onClick={() => setDrawType(d.value)}
+            >
+              {d.label}
+            </button>
+          ))}
         </div>
-        <div className="bill-setting-item">
-          <label>งวดวันที่</label>
-          <input className="fav-input" type="date" value={drawDate} onChange={e => setDrawDate(e.target.value)} />
+        <div className="bill-date-row">
+          <span className="bill-date-label">งวดวันที่</span>
+          <input
+            className="bill-date-input"
+            type="date"
+            value={drawDate}
+            onChange={e => setDrawDate(e.target.value)}
+          />
         </div>
       </div>
 
-      <div className="bill-table-wrap">
-        <div className="bill-table-head">
-          <span className="bill-col-num">เลข</span>
-          <span className="bill-col-price">บน (฿)</span>
-          <span className="bill-col-price">ล่าง/โต๊ด (฿)</span>
-          <span className="bill-col-del" />
-        </div>
-
-        <div className="bill-bulk-row">
-          <span className="bill-bulk-label">ตั้งราคาทุกเลข</span>
+      {/* Step 2: Bet slip */}
+      <div className="shop-step">
+        <div className="shop-step-label">2 · กรอกเลขและราคา</div>
+        <div className="bet-slip">
           <input
-            className="bill-price-input"
-            type="number"
+            className="bet-number-input"
+            type="text"
             inputMode="numeric"
-            placeholder="บน"
-            value={bulkTop}
-            onChange={e => setBulkTop(e.target.value)}
-            min={0}
+            placeholder="กรอกเลข เช่น 12 หรือ 12 22 36"
+            value={numberInput}
+            onChange={e => setNumberInput(e.target.value)}
+            onPaste={e => {
+              e.preventDefault()
+              setNumberInput(e.clipboardData.getData('text'))
+            }}
           />
-          <input
-            className="bill-price-input"
-            type="number"
-            inputMode="numeric"
-            placeholder="ล่าง/โต๊ด"
-            value={bulkBottom}
-            onChange={e => setBulkBottom(e.target.value)}
-            min={0}
-          />
-          <button className="bill-bulk-btn" onClick={applyBulk}>ตั้งราคา</button>
-        </div>
+          {parsedNumbers.length > 1 && (
+            <div className="bet-parsed-preview">
+              {parsedNumbers.map((n, i) => <span key={i} className="bet-preview-chip">{n}</span>)}
+            </div>
+          )}
 
-        {rows.map((row, idx) => (
-          <div key={row.id} className="bill-row">
-            <input
-              className="bill-num-input"
-              type="text"
-              inputMode="numeric"
-              placeholder={`เลข ${idx + 1}`}
-              value={row.number}
-              onChange={e => handleNumberChange(row.id, e.target.value)}
-              onPaste={e => {
-                e.preventDefault()
-                handleNumberChange(row.id, e.clipboardData.getData('text'))
-              }}
-              maxLength={12}
-            />
-            <input
-              className="bill-price-input"
-              type="number"
-              inputMode="numeric"
-              placeholder="0"
-              value={row.priceTop}
-              onChange={e => updateRow(row.id, 'priceTop', e.target.value)}
-              min={0}
-            />
-            <input
-              className="bill-price-input"
-              type="number"
-              inputMode="numeric"
-              placeholder="0"
-              value={row.priceBottom}
-              onChange={e => updateRow(row.id, 'priceBottom', e.target.value)}
-              min={0}
-            />
-            <button className="bill-del-btn" onClick={() => removeRow(row.id)} title="ลบแถวนี้">×</button>
+          {/* Bet type toggles */}
+          <div className="bet-type-list">
+            {[
+              { key: 'top', label: 'บน', price: priceTop, setPrice: setPriceTop },
+              { key: 'bottom', label: 'ล่าง', price: priceBottom, setPrice: setPriceBottom },
+              { key: 'toad', label: 'โต๊ด', price: priceToad, setPrice: setPriceToad, note: '3 ตัวเท่านั้น' },
+            ].map(({ key, label, price, setPrice, note }) => (
+              <div key={key} className={'bet-type-item' + (betTypes[key] ? ' active' : '')}>
+                <button
+                  className={'bet-type-toggle' + (betTypes[key] ? ' active' : '')}
+                  onClick={() => toggleBetType(key)}
+                >
+                  <span className="bet-type-check">{betTypes[key] ? '✓' : ''}</span>
+                  {label}
+                  {note && <span className="bet-type-note">{note}</span>}
+                </button>
+                {betTypes[key] && (
+                  <div className="bet-price-row">
+                    <div className="bet-quick-amounts">
+                      {QUICK_AMOUNTS.map(a => (
+                        <button
+                          key={a}
+                          className={'bet-quick-btn' + (price === String(a) ? ' active' : '')}
+                          onClick={() => setPrice(String(a))}
+                        >
+                          {a}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      className="bet-price-in"
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="฿"
+                      value={price}
+                      onChange={e => setPrice(e.target.value)}
+                      min={1}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
 
-        <div className="bill-row-actions">
-          <button className="bill-add-row-btn" onClick={addRow}>+ เพิ่มแถว</button>
-          <button className="bill-save-btn" onClick={saveToList} disabled={!hasValidRows}>
-            ✓ บันทึกลง list
+          <button className="bet-add-btn" onClick={addToCart} disabled={!canAdd()}>
+            + เพิ่มลงตะกร้า
+            {activeNumbers.length > 1 && (
+              <span className="bet-add-badge">{activeNumbers.length} เลข</span>
+            )}
           </button>
         </div>
       </div>
 
-      {groups.length > 0 && (
-        <div className="bill-groups">
-          <div className="bill-groups-head">
-            <span>{totalItems} เลข — {groups.length} ชุด</span>
-          </div>
+      {/* Step 3: Cart */}
+      {cart.length > 0 && (
+        <div className="shop-step">
+          <div className="shop-step-label">3 · ตรวจสอบรายการ</div>
+          <div className="bill-cart">
+            <div className="bill-cart-head">
+              <span className="bill-cart-title">🛒 ตะกร้า</span>
+              <span className="bill-cart-count">{cart.length} รายการ</span>
+              <button className="bill-cart-clear" onClick={clearCart}>ล้างทั้งหมด</button>
+            </div>
 
-          {groups.map((g, gi) => (
-            <div key={g.id} className="bill-group">
-              <div className="bill-group-header">
-                <span className="bill-group-title">ชุดที่ {gi + 1} · {drawLabel(g.drawType)} {g.drawDate}</span>
-                <button className="bill-cancel-group" onClick={() => cancelGroup(g.id)}>ยกเลิกทั้งชุด</button>
-              </div>
-              <div className="bill-group-items">
-                {groupByPrice(g.items).map((pg, pgi) => (
-                  <div key={pgi} className="bill-price-group">
-                    <div className="bill-price-group-nums">
-                      {pg.items.map(item => (
-                        <button
-                          key={item.id}
-                          className="bill-num-chip"
-                          onClick={() => removeFromGroup(g.id, item.id)}
-                          title="กดเพื่อลบ"
-                        >
-                          {item.number} <span className="bill-item-x">×</span>
-                        </button>
-                      ))}
-                    </div>
-                    <div className="bill-price-group-prices">
-                      {Number(pg.priceTop) > 0 && <span className="bill-item-price">บน {pg.priceTop}฿</span>}
-                      {Number(pg.priceBottom) > 0 && (
-                        <span className="bill-item-price">
-                          {pg.items.some(i => i.number.length === 3) ? 'โต๊ด' : 'ล่าง'} {pg.priceBottom}฿
-                        </span>
-                      )}
-                    </div>
+            <div className="bill-cart-items">
+              {cartByNumber.map((group, gi) => (
+                <div key={gi} className="bill-cart-ticket">
+                  <div className="bill-ticket-left">
+                    <div className="bill-ticket-number">{group.number}</div>
+                    <div className="bill-ticket-draw">{drawLabel(group.drawType)}</div>
                   </div>
-                ))}
+                  <div className="bill-ticket-bets">
+                    {group.bets.map(bet => (
+                      <div key={bet.id} className="bill-ticket-bet-row">
+                        <span className={`bill-bet-badge bill-bet-${bet.betType === 'บน' ? 'top' : bet.betType === 'ล่าง' ? 'bot' : 'toad'}`}>
+                          {bet.betType}
+                        </span>
+                        <span className="bill-bet-price">{bet.price.toLocaleString()}฿</span>
+                        <button className="bill-ticket-remove" onClick={() => removeFromCart(bet.id)} title="ลบ">×</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bill-cart-footer">
+              <div className="bill-cart-total">
+                <span>ยอดรวมทั้งหมด</span>
+                <span className="bill-total-amount">{totalAmount.toLocaleString()} ฿</span>
+              </div>
+              <div className="bill-cart-actions">
+                <button className="bill-copy-btn" onClick={copyAll}>
+                  {copyDone ? '✓ คัดลอกแล้ว' : '📋 คัดลอก'}
+                </button>
+                <button className="bill-commit-btn" onClick={saveToPurchases} disabled={saving}>
+                  {saving ? 'กำลังบันทึก...' : saveDone ? '✓ บันทึกแล้ว!' : '✅ ยืนยันรายการ'}
+                </button>
               </div>
             </div>
-          ))}
-
-          <div className="bill-actions">
-            <button className="bill-copy-btn" onClick={copyAll}>
-              {copyDone ? '✓ คัดลอกแล้ว' : '📋 Copy ทั้งหมด'}
-            </button>
-            <button className="bill-commit-btn" onClick={saveToPurchases} disabled={saving}>
-              {saving ? 'กำลังบันทึก...' : saveDone ? '✓ บันทึกแล้ว!' : '💾 บันทึกลงประวัติการซื้อ'}
-            </button>
           </div>
         </div>
       )}
