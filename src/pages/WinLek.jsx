@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 
 function parseDigits(input) {
   const all = []
@@ -26,9 +26,23 @@ function multisetPermutations(arr, k) {
 
 const allSame = (p) => p.every((d) => d === p[0])
 
-export default function WinLek() {
+function applyFilters(list, startF, endF, containsF) {
+  return list.filter((n) => {
+    if (startF && !n.startsWith(startF)) return false
+    if (endF && !n.endsWith(endF)) return false
+    if (containsF && !n.includes(containsF)) return false
+    return true
+  })
+}
+
+export default function WinLek({ apiBase = '' }) {
   const [input, setInput] = useState('')
   const inputRef = useRef(null)
+
+  const [startFilter, setStartFilter] = useState('')
+  const [endFilter, setEndFilter] = useState('')
+  const [containsFilter, setContainsFilter] = useState('')
+  const [copied, setCopied] = useState(null)
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus()
@@ -60,16 +74,41 @@ export default function WinLek() {
     }
   }, [digits])
 
-  const copyAll = (list) => {
-    navigator.clipboard.writeText(list.join(' '))
+  const trackNumber = useCallback((number) => {
+    fetch(`${apiBase}/api/hot/track`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number, draw_type: 'all' }),
+    }).catch(() => {})
+  }, [apiBase])
+
+  const copyChip = (n) => {
+    navigator.clipboard.writeText(n)
+    trackNumber(n)
+    setCopied(n)
+    setTimeout(() => setCopied(null), 1200)
   }
 
-  const outputs = [
+  const copyAll = (list) => {
+    navigator.clipboard.writeText(list.join(' '))
+    list.forEach((n) => trackNumber(n))
+  }
+
+  const hasFilter = startFilter || endFilter || containsFilter
+  const clearFilters = () => { setStartFilter(''); setEndFilter(''); setContainsFilter('') }
+
+  const rawOutputs = [
     { title: 'เลข 2 ตัว (ไม่รวมเบิ้ล)', icon: '2️⃣', list: twoNoDouble },
     { title: 'เลข 2 ตัว (รวมเบิ้ล)', icon: '2️⃣', list: twoWithDouble },
     { title: 'เลข 3 ตัว (ไม่รวมตอง)', icon: '3️⃣', list: threeNoTriple },
     { title: 'เลข 3 ตัว (รวมตอง)', icon: '3️⃣', list: threeWithTriple },
   ]
+
+  const outputs = rawOutputs.map((out) => ({
+    ...out,
+    list: hasFilter ? applyFilters(out.list, startFilter, endFilter, containsFilter) : out.list,
+  }))
 
   return (
     <>
@@ -92,6 +131,42 @@ export default function WinLek() {
         </div>
       </section>
 
+      {digits.length > 0 && (
+        <div className="winlek-filter">
+          <label>กรอง:</label>
+          <input
+            className="winlek-filter-input"
+            type="text"
+            inputMode="numeric"
+            placeholder="ขึ้นต้น"
+            value={startFilter}
+            onChange={(e) => setStartFilter(e.target.value.replace(/\D/g, '').slice(0, 2))}
+            maxLength={2}
+          />
+          <input
+            className="winlek-filter-input"
+            type="text"
+            inputMode="numeric"
+            placeholder="ลงท้าย"
+            value={endFilter}
+            onChange={(e) => setEndFilter(e.target.value.replace(/\D/g, '').slice(0, 2))}
+            maxLength={2}
+          />
+          <input
+            className="winlek-filter-input"
+            type="text"
+            inputMode="numeric"
+            placeholder="มีเลข"
+            value={containsFilter}
+            onChange={(e) => setContainsFilter(e.target.value.replace(/\D/g, '').slice(0, 1))}
+            maxLength={1}
+          />
+          {hasFilter && (
+            <button className="winlek-filter-clear" onClick={clearFilters}>ล้าง</button>
+          )}
+        </div>
+      )}
+
       <section className="outputs-grid">
         {outputs.map((out) => (
           <div className="output-card" key={out.title}>
@@ -113,7 +188,15 @@ export default function WinLek() {
                 <span className="empty">—</span>
               ) : (
                 out.list.map((n) => (
-                  <span key={n} className="num-chip">{n}</span>
+                  <span
+                    key={n}
+                    className={`num-chip${copied === n ? ' copied' : ''}`}
+                    onClick={() => copyChip(n)}
+                    title="แตะเพื่อคัดลอก"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {copied === n ? '✓' : n}
+                  </span>
                 ))
               )}
             </div>

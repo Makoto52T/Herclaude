@@ -209,7 +209,7 @@ function App() {
 
       <main className="content">
         <Routes>
-          <Route path="/" element={hasAnyActive ? <WinLek /> : <Navigate to="/plans" replace />} />
+          <Route path="/" element={hasAnyActive ? <WinLek apiBase={API_BASE} /> : <Navigate to="/plans" replace />} />
           <Route path="/formulas" element={hasAnyActive ? <Formulas /> : <Navigate to="/plans" replace />} />
           <Route path="/dream" element={hasAnyActive ? <Dream apiBase={API_BASE} hasAccess={hasPremium} /> : <Navigate to="/plans" replace />} />
           <Route path="/stats" element={hasAnyActive ? <Stats apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} /> : <Navigate to="/plans" replace />} />
