@@ -1444,6 +1444,23 @@ html, body, #root { height: 100%; }
   margin-left: auto;
 }
 
+.bet-reverse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-main);
+  user-select: none;
+}
+.bet-reverse-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 /* Price row */
 .bet-price-row {
   display: flex;

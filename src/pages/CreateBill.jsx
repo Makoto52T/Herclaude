@@ -32,6 +32,7 @@ export default function CreateBill({ apiBase, onError }) {
 
   const [numberInput, setNumberInput] = useState('')
   const [betTypes, setBetTypes] = useState({ top: true, bottom: false, toad: false })
+  const [reverseNumbers, setReverseNumbers] = useState(false)
   const [priceTop, setPriceTop] = useState('')
   const [priceBottom, setPriceBottom] = useState('')
   const [priceToad, setPriceToad] = useState('')
@@ -47,6 +48,15 @@ export default function CreateBill({ apiBase, onError }) {
 
   const toggleBetType = (type) => setBetTypes(prev => ({ ...prev, [type]: !prev[type] }))
 
+  const getReversed = (num) => num.split('').reverse().join('')
+
+  const expandNumbers = (nums) => {
+    if (!reverseNumbers) return nums
+    const set = new Set(nums)
+    nums.forEach(n => set.add(getReversed(n)))
+    return [...set]
+  }
+
   const canAdd = () => {
     if (activeNumbers.length === 0) return false
     if (!betTypes.top && !betTypes.bottom && !betTypes.toad) return false
@@ -59,7 +69,7 @@ export default function CreateBill({ apiBase, onError }) {
   const addToCart = () => {
     if (!canAdd()) return
     const newItems = []
-    activeNumbers.forEach(num => {
+    expandNumbers(activeNumbers).forEach(num => {
       if (betTypes.top && Number(priceTop) > 0) {
         newItems.push({ id: _uid++, number: num, betType: 'บน', price: Number(priceTop), drawType, drawDate })
       }
@@ -194,7 +204,7 @@ export default function CreateBill({ apiBase, onError }) {
             placeholder="กรอกเลข เช่น 12 หรือ 12 22 36"
             value={numberInput}
             onChange={e => setNumberInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleAdd() }}
+            onKeyDown={e => { if (e.key === 'Enter') addToCart() }}
             onPaste={e => {
               e.preventDefault()
               setNumberInput(e.clipboardData.getData('text'))
@@ -205,6 +215,15 @@ export default function CreateBill({ apiBase, onError }) {
               {parsedNumbers.map((n, i) => <span key={i} className="bet-preview-chip">{n}</span>)}
             </div>
           )}
+
+          <label className="bet-reverse-toggle">
+            <input
+              type="checkbox"
+              checked={reverseNumbers}
+              onChange={e => setReverseNumbers(e.target.checked)}
+            />
+            <span>เลขกลับ <span className="bet-type-note">(เพิ่มเลขสลับตำแหน่งอัตโนมัติ)</span></span>
+          </label>
 
           {/* Bet type toggles */}
           <div className="bet-type-list">
