@@ -1483,27 +1483,45 @@ html, body, #root { height: 100%; }
 
 .bill-group-items {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 6px;
   padding: 10px 14px;
 }
-.bill-item-chip {
+.bill-price-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bill-price-group-nums {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1;
+}
+.bill-price-group-prices {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.bill-num-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   background: #0f1016;
   border: 1px solid var(--border);
   border-radius: 20px;
   color: var(--text-h);
   cursor: pointer;
-  font-size: 13px;
-  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 9px;
   transition: border-color .15s, background .15s;
 }
-.bill-item-chip:hover { border-color: #ef4444; background: rgba(239,68,68,.07); }
-.bill-item-num { font-weight: 700; font-size: 15px; }
-.bill-item-price { color: var(--text-dim); font-size: 11px; background: rgba(255,255,255,.05); padding: 1px 5px; border-radius: 4px; }
-.bill-item-x { color: var(--text-dim); font-size: 13px; margin-left: 2px; }
+.bill-num-chip:hover { border-color: #ef4444; background: rgba(239,68,68,.07); }
+.bill-item-price { color: var(--text-dim); font-size: 11px; background: rgba(255,255,255,.05); padding: 2px 6px; border-radius: 4px; }
+.bill-item-x { color: var(--text-dim); font-size: 12px; }
 
 .bill-actions {
   display: flex;

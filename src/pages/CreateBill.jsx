@@ -29,6 +29,16 @@ function newRow() {
   return { id: _uid++, number: '', priceTop: '', priceBottom: '' }
 }
 
+function groupByPrice(items) {
+  const map = new Map()
+  items.forEach(item => {
+    const key = `${item.priceTop}|${item.priceBottom}`
+    if (!map.has(key)) map.set(key, { priceTop: item.priceTop, priceBottom: item.priceBottom, items: [] })
+    map.get(key).items.push(item)
+  })
+  return Array.from(map.values())
+}
+
 export default function CreateBill({ apiBase, onError }) {
   const [showHelp, setShowHelp] = useState(false)
   const [drawType, setDrawType] = useState('thai_gov')
@@ -291,22 +301,29 @@ export default function CreateBill({ apiBase, onError }) {
                 <button className="bill-cancel-group" onClick={() => cancelGroup(g.id)}>ยกเลิกทั้งชุด</button>
               </div>
               <div className="bill-group-items">
-                {g.items.map(item => (
-                  <button
-                    key={item.id}
-                    className="bill-item-chip"
-                    onClick={() => removeFromGroup(g.id, item.id)}
-                    title="กดเพื่อลบ"
-                  >
-                    <span className="bill-item-num">{item.number}</span>
-                    {Number(item.priceTop) > 0 && <span className="bill-item-price">บน {item.priceTop}</span>}
-                    {Number(item.priceBottom) > 0 && (
-                      <span className="bill-item-price">
-                        {item.number.length === 3 ? 'โต๊ด' : 'ล่าง'} {item.priceBottom}
-                      </span>
-                    )}
-                    <span className="bill-item-x">×</span>
-                  </button>
+                {groupByPrice(g.items).map((pg, pgi) => (
+                  <div key={pgi} className="bill-price-group">
+                    <div className="bill-price-group-nums">
+                      {pg.items.map(item => (
+                        <button
+                          key={item.id}
+                          className="bill-num-chip"
+                          onClick={() => removeFromGroup(g.id, item.id)}
+                          title="กดเพื่อลบ"
+                        >
+                          {item.number} <span className="bill-item-x">×</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="bill-price-group-prices">
+                      {Number(pg.priceTop) > 0 && <span className="bill-item-price">บน {pg.priceTop}฿</span>}
+                      {Number(pg.priceBottom) > 0 && (
+                        <span className="bill-item-price">
+                          {pg.items.some(i => i.number.length === 3) ? 'โต๊ด' : 'ล่าง'} {pg.priceBottom}฿
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
