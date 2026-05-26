@@ -1285,3 +1285,257 @@ html, body, #root { height: 100%; }
   gap: 8px;
 }
 .help-steps li { color: var(--text); font-size: 14px; line-height: 1.5; }
+
+/* ─── Create Bill ──────────────────────────────────────── */
+.bill-page { padding: 16px; max-width: 600px; margin: 0 auto; }
+.bill-header { margin-bottom: 16px; }
+.bill-header h2 { margin: 0 0 4px; color: var(--text-h); font-size: 20px; display: flex; align-items: center; gap: 4px; }
+.bill-header p { margin: 0; color: var(--text); font-size: 13px; }
+
+.bill-settings {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.bill-setting-item { display: flex; align-items: center; gap: 8px; }
+.bill-setting-item label { color: var(--text); font-size: 13px; white-space: nowrap; }
+
+.bill-table-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.bill-table-head {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px 32px;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #0f1016;
+  border-bottom: 1px solid var(--border);
+}
+.bill-col-num, .bill-col-price { color: var(--text-dim); font-size: 12px; font-weight: 600; letter-spacing: .5px; }
+.bill-col-price { text-align: center; }
+
+.bill-bulk-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px 80px;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(99,102,241,.07);
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.bill-bulk-label { color: var(--text-dim); font-size: 12px; }
+
+.bill-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px 32px;
+  gap: 6px;
+  padding: 6px 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.bill-row:last-of-type { border-bottom: none; }
+
+.bill-num-input {
+  background: #0f1016;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-h);
+  padding: 7px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.bill-num-input:focus { border-color: var(--accent); }
+
+.bill-price-input {
+  background: #0f1016;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-h);
+  padding: 7px 8px;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+.bill-price-input:focus { border-color: var(--accent); }
+
+.bill-del-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color .15s, color .15s;
+}
+.bill-del-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+.bill-bulk-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+.bill-bulk-btn:hover { opacity: .85; }
+
+.bill-row-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #0f1016;
+  border-top: 1px solid var(--border);
+}
+.bill-add-row-btn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 14px;
+  transition: border-color .15s, color .15s;
+}
+.bill-add-row-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.bill-save-btn {
+  margin-left: auto;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 18px;
+  transition: opacity .15s;
+}
+.bill-save-btn:disabled { opacity: .4; cursor: not-allowed; }
+.bill-save-btn:not(:disabled):hover { opacity: .85; }
+
+/* Groups */
+.bill-groups {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.bill-groups-head {
+  padding: 10px 14px;
+  background: #0f1016;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.bill-group { border-bottom: 1px solid var(--border); }
+.bill-group:last-of-type { border-bottom: none; }
+
+.bill-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(99,102,241,.04);
+  gap: 8px;
+}
+.bill-group-title { color: var(--text); font-size: 13px; font-weight: 600; }
+.bill-cancel-group {
+  background: none;
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 10px;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.bill-cancel-group:hover { background: rgba(239,68,68,.1); }
+
+.bill-group-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px;
+}
+.bill-item-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #0f1016;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-h);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 5px 10px;
+  transition: border-color .15s, background .15s;
+}
+.bill-item-chip:hover { border-color: #ef4444; background: rgba(239,68,68,.07); }
+.bill-item-num { font-weight: 700; font-size: 15px; }
+.bill-item-price { color: var(--text-dim); font-size: 11px; background: rgba(255,255,255,.05); padding: 1px 5px; border-radius: 4px; }
+.bill-item-x { color: var(--text-dim); font-size: 13px; margin-left: 2px; }
+
+.bill-actions {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #0f1016;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.bill-copy-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-h);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 16px;
+  transition: border-color .15s;
+}
+.bill-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.bill-commit-btn {
+  flex: 1;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 16px;
+  transition: opacity .15s;
+}
+.bill-commit-btn:disabled { opacity: .5; cursor: not-allowed; }
+.bill-commit-btn:not(:disabled):hover { opacity: .88; }
