@@ -6,6 +6,10 @@ import Plans from './pages/Plans.jsx'
 import Articles from './pages/Articles.jsx'
 import ArticleDetail from './pages/ArticleDetail.jsx'
 import Formulas from './pages/Formulas.jsx'
+import Favorites from './pages/Favorites.jsx'
+import HotNumbers from './pages/HotNumbers.jsx'
+import Purchases from './pages/Purchases.jsx'
+import Stats from './pages/Stats.jsx'
 import './App.css'
 
 const API_BASE = import.meta.env.DEV ? 'http://129.212.231.19' : ''
@@ -173,6 +177,18 @@ function App() {
           <NavLink to="/dream" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
             <span className="drawer-ic">🌙</span> ทำนายฝัน {!hasPremium && <span className="lock">🔒</span>}
           </NavLink>
+          <NavLink to="/stats" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+            <span className="drawer-ic">📊</span> สถิติ & ทำนาย {!hasAnyActive && <span className="lock">🔒</span>}
+          </NavLink>
+          <NavLink to="/favorites" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+            <span className="drawer-ic">⭐</span> เลขโปรด {!hasAnyActive && <span className="lock">🔒</span>}
+          </NavLink>
+          <NavLink to="/purchases" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+            <span className="drawer-ic">📝</span> บันทึกซื้อ {!hasAnyActive && <span className="lock">🔒</span>}
+          </NavLink>
+          <NavLink to="/hot" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
+            <span className="drawer-ic">🔥</span> เลขฮอต
+          </NavLink>
           <NavLink to="/articles" className={({ isActive }) => 'drawer-link' + (isActive ? ' active' : '')}>
             <span className="drawer-ic">📚</span> บทความ
           </NavLink>
@@ -196,6 +212,10 @@ function App() {
           <Route path="/" element={hasAnyActive ? <WinLek /> : <Navigate to="/plans" replace />} />
           <Route path="/formulas" element={hasAnyActive ? <Formulas /> : <Navigate to="/plans" replace />} />
           <Route path="/dream" element={hasAnyActive ? <Dream apiBase={API_BASE} hasAccess={hasPremium} /> : <Navigate to="/plans" replace />} />
+          <Route path="/stats" element={hasAnyActive ? <Stats apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} /> : <Navigate to="/plans" replace />} />
+          <Route path="/favorites" element={hasAnyActive ? <Favorites apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} /> : <Navigate to="/plans" replace />} />
+          <Route path="/purchases" element={hasAnyActive ? <Purchases apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} /> : <Navigate to="/plans" replace />} />
+          <Route path="/hot" element={<HotNumbers apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
           <Route path="/plans" element={<Plans plans={plans} apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
           <Route path="/articles" element={<Articles apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
           <Route path="/articles/:slug" element={<ArticleDetail apiBase={API_BASE} onError={(msg) => setBanner({ type: 'error', text: msg })} />} />
