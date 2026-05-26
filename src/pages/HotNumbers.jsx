@@ -1,4 +1,13 @@
 import { useEffect, useState } from 'react'
+import HelpModal from '../HelpModal'
+
+const HELP_STEPS = [
+  'หน้านี้แสดงเลขที่ user คนอื่น ๆ ค้นหาในหน้าสถิติมากที่สุด',
+  'กรองตามประเภทหวย หรือดูรวมทุกประเภทก็ได้',
+  'เลือกช่วงเวลา "วันนี้ / 7 วัน / 30 วัน" เพื่อดู trend ที่แตกต่างกัน',
+  'ข้อมูลนี้ไม่ระบุตัวตน — รวบรวมจากการค้นหาของ user ที่ล็อกอินเท่านั้น',
+  'เลขที่ขึ้น 🥇🥈🥉 คือเลขฮอต 3 อันดับแรกในช่วงนั้น',
+]
 
 const DRAW_TYPES = [
   { value: 'all', label: 'ทั้งหมด' },
@@ -8,6 +17,7 @@ const DRAW_TYPES = [
 ]
 
 export default function HotNumbers({ apiBase, onError }) {
+  const [showHelp, setShowHelp] = useState(false)
   const [drawType, setDrawType] = useState('all')
   const [days, setDays] = useState(7)
   const [hot, setHot] = useState([])
@@ -28,8 +38,9 @@ export default function HotNumbers({ apiBase, onError }) {
 
   return (
     <section className="hot-page">
+      {showHelp && <HelpModal title="วิธีใช้ เลขฮอต Community" steps={HELP_STEPS} onClose={() => setShowHelp(false)} />}
       <div className="stats-header">
-        <h2>🔥 เลขฮอต Community</h2>
+        <h2>🔥 เลขฮอต Community <button className="help-btn" onClick={() => setShowHelp(true)} title="วิธีใช้">?</button></h2>
         <p>เลขที่ user คนอื่น ๆ ค้นหามากที่สุดในช่วงนี้</p>
       </div>
 

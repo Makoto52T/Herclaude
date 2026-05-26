@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import HelpModal from '../HelpModal'
+
+const HELP_STEPS = [
+  'พิมพ์สิ่งที่ฝันเห็น เช่น "งู", "พระ", "ช้าง", "เลขทะเบียนรถ"',
+  'กด "🔮 ทำนาย" หรือกด Enter เพื่อค้นหา',
+  'ระบบจะดึงเลขเด่นจากตำราฝันแบบดั้งเดิม พร้อมความหมาย',
+  'กด 📋 เพื่อคัดลอกเลขทั้งหมดที่เกี่ยวกับสิ่งที่ฝันเห็น',
+  'ฟีเจอร์นี้ใช้ได้เฉพาะแพลน ครึ่งปี หรือ รายปี เท่านั้น',
+]
 
 export default function Dream({ apiBase, hasAccess }) {
+  const [showHelp, setShowHelp] = useState(false)
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
@@ -54,7 +64,12 @@ export default function Dream({ apiBase, hasAccess }) {
 
   return (
     <>
+      {showHelp && <HelpModal title="วิธีใช้ ทำนายฝัน" steps={HELP_STEPS} onClose={() => setShowHelp(false)} />}
       <section className="input-card">
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ flex: 1, fontWeight: 600, color: 'var(--text-h)' }}>ทำนายฝัน</span>
+          <button className="help-btn" type="button" onClick={() => setShowHelp(true)} title="วิธีใช้">?</button>
+        </div>
         <form onSubmit={handleLookup} className="dream-form">
           <input
             ref={inputRef}

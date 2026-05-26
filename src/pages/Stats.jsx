@@ -1,4 +1,14 @@
 import { useEffect, useState } from 'react'
+import HelpModal from '../HelpModal'
+
+const HELP_STEPS = [
+  'เลือกประเภทหวย (หวยรัฐบาล / หวยฮานอย / หวยลาว) ที่ต้องการดูสถิติ',
+  'เลือกช่วงเวลา 30 / 60 / 90 / 180 วัน เพื่อดูความถี่ในช่วงนั้น',
+  'ตารางจะแสดงเลขที่ออกบ่อยที่สุด 30 อันดับแรก พร้อม bar graph',
+  'ส่วน "Prediction Confidence" วิเคราะห์ pattern ความถี่ + ระยะเวลา',
+  'ค่า % ในส่วน Prediction เป็นเพียงตัวชี้วัดทางสถิติ — ไม่ใช่การทำนายผล',
+  'เลือก 2 ตัว หรือ 3 ตัว เพื่อดู prediction แยกตาม digit',
+]
 
 const DRAW_TYPES = [
   { value: 'thai_gov', label: 'หวยรัฐบาล' },
@@ -12,6 +22,7 @@ const DIGIT_OPTIONS = [
 ]
 
 export default function Stats({ apiBase, onError }) {
+  const [showHelp, setShowHelp] = useState(false)
   const [drawType, setDrawType] = useState('thai_gov')
   const [days, setDays] = useState(90)
   const [stats, setStats] = useState([])
@@ -48,8 +59,9 @@ export default function Stats({ apiBase, onError }) {
 
   return (
     <section className="stats-page">
+      {showHelp && <HelpModal title="วิธีใช้ สถิติ & Prediction" steps={HELP_STEPS} onClose={() => setShowHelp(false)} />}
       <div className="stats-header">
-        <h2>📊 สถิติเลขดัง</h2>
+        <h2>📊 สถิติเลขดัง <button className="help-btn" onClick={() => setShowHelp(true)} title="วิธีใช้">?</button></h2>
         <p>ความถี่ของเลขที่ออกในแต่ละประเภทหวย</p>
       </div>
 

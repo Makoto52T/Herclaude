@@ -1,4 +1,13 @@
 import { useEffect, useState } from 'react'
+import HelpModal from '../HelpModal'
+
+const HELP_STEPS = [
+  'กด "+ บันทึกการซื้อ" เพื่อเปิดฟอร์มบันทึก',
+  'เลือกประเภทหวย งวดวันที่ เลขที่แทง ประเภทการแทง และจำนวนเงิน',
+  'รายการที่บันทึกจะแสดงสถานะ "รอผล" จนกว่าจะอัพเดต',
+  'กด "อัพเดต" บนรายการ "รอผล" เพื่อบันทึกว่าถูก/ไม่ถูก และเงินที่ได้',
+  'ยอดรวม "แทงไป / ได้กลับ / กำไร-ขาดทุน" แสดงที่ด้านบนอัตโนมัติ',
+]
 
 const DRAW_TYPES = [
   { value: 'thai_gov', label: 'หวยรัฐบาล' },
@@ -21,6 +30,7 @@ function todayStr() {
 }
 
 export default function Purchases({ apiBase, onError }) {
+  const [showHelp, setShowHelp] = useState(false)
   const [purchases, setPurchases] = useState([])
   const [pnl, setPnl] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -87,8 +97,9 @@ export default function Purchases({ apiBase, onError }) {
 
   return (
     <section className="pur-page">
+      {showHelp && <HelpModal title="วิธีใช้ ประวัติการซื้อ" steps={HELP_STEPS} onClose={() => setShowHelp(false)} />}
       <div className="pur-header">
-        <h2>💰 ประวัติการซื้อ</h2>
+        <h2>💰 ประวัติการซื้อ <button className="help-btn" onClick={() => setShowHelp(true)} title="วิธีใช้">?</button></h2>
         <p>บันทึกการแทงหวย ติดตามกำไร-ขาดทุน</p>
       </div>
 

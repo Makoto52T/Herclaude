@@ -1224,3 +1224,64 @@ html, body, #root { height: 100%; }
   padding: 4px 10px;
 }
 .winlek-filter-clear:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─── Help Modal ─── */
+.help-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  transition: border-color .15s, color .15s;
+}
+.help-btn:hover { border-color: var(--accent); color: var(--accent); }
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 16px;
+}
+.help-modal {
+  background: #1a1d27;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  padding: 20px 24px;
+}
+.help-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.help-modal-header h3 { margin: 0; font-size: 16px; color: var(--text-h); }
+.help-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.help-close:hover { color: var(--text-h); }
+.help-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.help-steps li { color: var(--text); font-size: 14px; line-height: 1.5; }

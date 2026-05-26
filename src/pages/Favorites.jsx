@@ -1,4 +1,13 @@
 import { useEffect, useState } from 'react'
+import HelpModal from '../HelpModal'
+
+const HELP_STEPS = [
+  'กรอกเลขที่ต้องการบันทึก เลือกประเภทหวย และใส่ชื่อ/หมายเหตุ (ไม่บังคับ)',
+  'กด "+ เพิ่ม" เพื่อบันทึกเลขโปรดลงระบบ',
+  'กด "🔍 เช็คผลทุกเลข" เพื่อให้ระบบตรวจผลรางวัลล่าสุดให้ทุกเลขที่บันทึกไว้',
+  'ผลการเช็คจะแสดงว่าถูก/ไม่ถูก พร้อมวันงวดล่าสุดที่มีข้อมูล',
+  'กด × เพื่อลบเลขโปรดที่ไม่ต้องการแล้ว',
+]
 
 const DRAW_TYPES = [
   { value: 'thai_gov', label: 'หวยรัฐบาล' },
@@ -11,6 +20,7 @@ function drawLabel(type) {
 }
 
 export default function Favorites({ apiBase, onError }) {
+  const [showHelp, setShowHelp] = useState(false)
   const [favorites, setFavorites] = useState([])
   const [checkResults, setCheckResults] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -88,8 +98,9 @@ export default function Favorites({ apiBase, onError }) {
 
   return (
     <section className="fav-page">
+      {showHelp && <HelpModal title="วิธีใช้ เลขโปรด" steps={HELP_STEPS} onClose={() => setShowHelp(false)} />}
       <div className="fav-header">
-        <h2>⭐ เลขโปรด</h2>
+        <h2>⭐ เลขโปรด <button className="help-btn" onClick={() => setShowHelp(true)} title="วิธีใช้">?</button></h2>
         <p>บันทึกเลขที่สนใจ และเช็คผลทุกงวดอัตโนมัติ</p>
       </div>
 

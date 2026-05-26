@@ -1,4 +1,14 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import HelpModal from '../HelpModal'
+
+const HELP_STEPS = [
+  'พิมพ์เลขที่ต้องการวิน เช่น "1234" หรือ "336" ในช่องด้านบน',
+  'ระบบจะแสดงการจัดเรียงเลขทุกรูปแบบ ทั้ง 2 ตัวและ 3 ตัว',
+  'ใส่เลขซ้ำเพื่อเปิดโอกาสเบิ้ล/ตอง เช่น "336" จะได้ตอง "333"',
+  'ใช้ตัวกรอง "ขึ้นต้น / ลงท้าย / มีเลข" เพื่อคัดเฉพาะที่สนใจ',
+  'แตะ chip เลขใดก็คัดลอก + บันทึกลงเลขฮอต Community อัตโนมัติ',
+  'กดปุ่ม 📋 เพื่อคัดลอกเลขทั้งหมดในกลุ่มนั้นพร้อมกัน',
+]
 
 function parseDigits(input) {
   const all = []
@@ -37,6 +47,7 @@ function applyFilters(list, startF, endF, containsF) {
 
 export default function WinLek({ apiBase = '' }) {
   const [input, setInput] = useState('')
+  const [showHelp, setShowHelp] = useState(false)
   const inputRef = useRef(null)
 
   const [startFilter, setStartFilter] = useState('')
@@ -112,7 +123,12 @@ export default function WinLek({ apiBase = '' }) {
 
   return (
     <>
+      {showHelp && <HelpModal title="วิธีใช้ วินเลข" steps={HELP_STEPS} onClose={() => setShowHelp(false)} />}
       <section className="input-card">
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ flex: 1, fontWeight: 600, color: 'var(--text-h)' }}>วินเลข</span>
+          <button className="help-btn" onClick={() => setShowHelp(true)} title="วิธีใช้">?</button>
+        </div>
         <input
           ref={inputRef}
           className="num-input"
