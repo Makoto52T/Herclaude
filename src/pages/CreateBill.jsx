@@ -194,6 +194,7 @@ export default function CreateBill({ apiBase, onError }) {
             placeholder="กรอกเลข เช่น 12 หรือ 12 22 36"
             value={numberInput}
             onChange={e => setNumberInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd() }}
             onPaste={e => {
               e.preventDefault()
               setNumberInput(e.clipboardData.getData('text'))
