@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import HelpModal from '../HelpModal'
 
 const DRAW_TYPES = [
@@ -8,6 +8,31 @@ const DRAW_TYPES = [
 ]
 
 const QUICK_AMOUNTS = [10, 20, 50, 100]
+
+const PAYOUT_PRESETS = [
+  { id: 'standard', label: 'มาตรฐาน', rates: { top3: 500, toad3: 100, top2: 70, bottom2: 70 } },
+  { id: 'high',     label: 'สูง',      rates: { top3: 500, toad3: 150, top2: 92, bottom2: 92 } },
+  { id: 'custom',   label: 'กำหนดเอง', rates: null },
+]
+
+const DEFAULT_CUSTOM_RATES = { top3: 500, toad3: 100, top2: 70, bottom2: 70 }
+
+function loadPayoutState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('bill_payout') || '{}')
+    return {
+      presetId: saved.presetId || 'standard',
+      custom: { ...DEFAULT_CUSTOM_RATES, ...(saved.custom || {}) },
+    }
+  } catch {
+    return { presetId: 'standard', custom: { ...DEFAULT_CUSTOM_RATES } }
+  }
+}
+
+function getRates(presetId, custom) {
+  const preset = PAYOUT_PRESETS.find(p => p.id === presetId)
+  return presetId === 'custom' ? custom : (preset?.rates || PAYOUT_PRESETS[0].rates)
+}
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10)
@@ -29,6 +54,16 @@ export default function CreateBill({ apiBase, onError }) {
   const [showHelp, setShowHelp] = useState(false)
   const [drawType, setDrawType] = useState('thai_gov')
   const [drawDate, setDrawDate] = useState(todayStr())
+
+  const initialPayout = loadPayoutState()
+  const [payoutPresetId, setPayoutPresetId] = useState(initialPayout.presetId)
+  const [customRates, setCustomRates]       = useState(initialPayout.custom)
+
+  useEffect(() => {
+    localStorage.setItem('bill_payout', JSON.stringify({ presetId: payoutPresetId, custom: customRates }))
+  }, [payoutPresetId, customRates])
+
+  const activeRates = getRates(payoutPresetId, customRates)
 
   const [numberInput, setNumberInput] = useState('')
   const [betTypes, setBetTypes] = useState({ top: true, bottom: false, toad: false })
@@ -191,6 +226,58 @@ export default function CreateBill({ apiBase, onError }) {
             onChange={e => setDrawDate(e.target.value)}
           />
         </div>
+      </div>
+
+      {/* Payout rates */}
+      <div className="shop-step">
+        <div className="shop-step-label">1.5 · อัตราจ่ายต่อบาท</div>
+        <div className="payout-presets">
+          {PAYOUT_PRESETS.map(p => (
+            <button
+              key={p.id}
+              className={'payout-preset-btn' + (payoutPresetId === p.id ? ' active' : '')}
+              onClick={() => setPayoutPresetId(p.id)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        {payoutPresetId !== 'custom' ? (
+          <div className="payout-rate-display">
+            {[
+              { label: '3 ตัวบน', key: 'top3' },
+              { label: '3 ตัวโต๊ด', key: 'toad3' },
+              { label: '2 ตัวบน', key: 'top2' },
+              { label: '2 ตัวล่าง', key: 'bottom2' },
+            ].map(({ label, key }) => (
+              <div key={key} className="payout-rate-chip">
+                <span className="payout-rate-type">{label}</span>
+                <span className="payout-rate-val">×{activeRates[key]}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="payout-custom-grid">
+            {[
+              { label: '3 ตัวบน', key: 'top3' },
+              { label: '3 ตัวโต๊ด', key: 'toad3' },
+              { label: '2 ตัวบน', key: 'top2' },
+              { label: '2 ตัวล่าง', key: 'bottom2' },
+            ].map(({ label, key }) => (
+              <label key={key} className="payout-custom-item">
+                <span>{label}</span>
+                <input
+                  type="number"
+                  className="payout-custom-input"
+                  value={customRates[key]}
+                  onChange={e => setCustomRates(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                  min={1}
+                />
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Step 2: Bet slip */}

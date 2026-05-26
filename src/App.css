@@ -1665,3 +1665,74 @@ html, body, #root { height: 100%; }
 }
 .bill-commit-btn:disabled { opacity: .5; cursor: not-allowed; }
 .bill-commit-btn:not(:disabled):hover { opacity: .88; }
+
+/* Payout rate selector */
+.payout-presets {
+  display: flex;
+  gap: 0;
+  padding: 10px 14px 0;
+}
+.payout-preset-btn {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 7px 4px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.payout-preset-btn:first-child { border-radius: 8px 0 0 8px; }
+.payout-preset-btn:last-child  { border-radius: 0 8px 8px 0; }
+.payout-preset-btn:not(:first-child) { border-left: none; }
+.payout-preset-btn.active {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.payout-rate-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px 4px;
+}
+.payout-rate-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+}
+.payout-rate-type { color: var(--text-secondary); }
+.payout-rate-val  { color: var(--accent); font-weight: 700; }
+
+.payout-custom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 14px 4px;
+}
+.payout-custom-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.payout-custom-input {
+  width: 72px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.85rem;
+  padding: 5px 8px;
+  text-align: right;
+}
+.payout-custom-input:focus { outline: none; border-color: var(--accent); }
